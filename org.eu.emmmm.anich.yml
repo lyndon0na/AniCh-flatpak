@@ -29,7 +29,7 @@ modules:
     sources:
       - type: file
         url: https://github.com/Sle2p/AniCh/releases/download/1.5.12/anich-linux-1.5.12.deb
-        sha256: sha256:7df1864bfff71acb5f90363d78b745fedfcb40a92fa1c6fe2fc894f433d0704e
+        sha256: 7df1864bfff71acb5f90363d78b745fedfcb40a92fa1c6fe2fc894f433d0704e
         dest-filename: anich.deb
       - type: file
         path: org.eu.emmmm.anich.png
