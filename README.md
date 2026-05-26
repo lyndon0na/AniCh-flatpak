@@ -7,9 +7,9 @@ Anich 的 Flatpak 打包配置文件。
 | 项目 | 值 |
 |------|-----|
 | 名称 | Anich |
-| 版本 | 1.5.8 |
+| 版本 | 1.5.12 |
 | App ID | org.eu.emmmm.anich |
-| Runtime | org.gnome.Platform 49 |
+| Runtime | org.gnome.Platform 50 |
 | 官网 | https://anich.emmmm.eu.org |
 | 源码 | https://github.com/Sle2p/AniCh |
 
@@ -27,7 +27,7 @@ sudo apt install flatpak flatpak-builder  # Debian/Ubuntu
 flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
 
 # 安装 GNOME SDK
-flatpak install flathub org.gnome.Platform//49 org.gnome.Sdk//49
+flatpak install flathub org.gnome.Platform//50 org.gnome.Sdk//50
 
 # 克隆仓库
 git clone https://github.com/你的用户名/仓库名.git

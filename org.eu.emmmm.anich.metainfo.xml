@@ -12,6 +12,6 @@
   <developer_name>Sle2p</developer_name>
   <launchable type="desktop-id">org.eu.emmmm.anich.desktop</launchable>
   <releases>
-    <release version="1.5.11" date="2025-05-20"/>
+    <release version="1.5.12" date="2025-05-26"/>
   </releases>
 </component>
