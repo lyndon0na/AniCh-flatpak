@@ -28,8 +28,8 @@ modules:
       - install -Dm644 org.eu.emmmm.anich.metainfo.xml ${FLATPAK_DEST}/share/metainfo/org.eu.emmmm.anich.metainfo.xml
     sources:
       - type: file
-        url: https://github.com/Sle2p/AniCh/releases/download/1.5.16/anich-linux-1.5.16.deb
-        sha256: 9c4fc266120296151ebf0552b6f3f4ab5e1a67b9540ce90871bef5277bb2f2d1
+        url: https://github.com/Sle2p/AniCh/releases/download/1.5.18/anich-linux-1.5.18.deb
+        sha256: 3423befd27d0551519dd01a91e3e632acafdf32179781e06b8e7fcaa9176a354
         dest-filename: anich.deb
       - type: file
         path: org.eu.emmmm.anich.png
