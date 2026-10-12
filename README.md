@@ -4,6 +4,12 @@ Build configuration that repackages the official Linux `.deb` as a Flatpak.
 
 **English** | [简体中文](README.zh-CN.md) | [Packaging notes](docs/packaging-notes.md)
 
+The current build (1.5.27) is published. One command installs it:
+
+```sh
+flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
+```
+
 ## App info
 
 | | |
@@ -22,7 +28,7 @@ Build configuration that repackages the official Linux `.deb` as a Flatpak.
 ### From the repository
 
 ```sh
-flatpak install --user https://<user>.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
+flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
 ```
 
 This adds the remote as well, so later versions arrive through `flatpak update`
@@ -185,4 +191,5 @@ which is released under [CC0-1.0](LICENSE).
 * [AniCh homepage](https://anich.emmmm.eu.org)
 * [AniCh source](https://github.com/Sle2p/AniCh)
 * [Packaging notes](docs/packaging-notes.md)
+* [Install page](https://lyndon0na.github.io/AniCh-flatpak/)
 * [Releases](../../releases)

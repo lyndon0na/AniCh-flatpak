@@ -4,6 +4,12 @@
 
 [English](README.md) | **简体中文** | [打包说明](docs/packaging-notes.md)
 
+当前版本（1.5.27）已发布，一条命令即可安装：
+
+```sh
+flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
+```
+
 ## 应用信息
 
 | 项目 | 值 |
@@ -22,7 +28,7 @@
 ### 从仓库安装
 
 ```sh
-flatpak install --user https://<user>.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
+flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.anich.flatpakref
 ```
 
 该命令会同时添加远程仓库，之后的版本通过 `flatpak update`（或桌面软件中心）更新。安装时会从 GitHub 下载约 22 MB 的 `.deb`，应用本体就来自那里。
@@ -147,4 +153,5 @@ git push origin v1.5.27
 * [AniCh 官网](https://anich.emmmm.eu.org)
 * [AniCh 源码](https://github.com/Sle2p/AniCh)
 * [打包说明](docs/packaging-notes.md)
+* [安装页面](https://lyndon0na.github.io/AniCh-flatpak/)
 * [Releases](../../releases)
