@@ -1,0 +1,19 @@
+# Template for the file CI publishes next to the repository. It is filled in
+# with the Pages URL and the base64 signing key and served as
+# org.eu.emmmm.anich.flatpakref, which is the one command a user needs:
+#
+#   flatpak install --user https://<pages>/org.eu.emmmm.anich.flatpakref
+#
+# After that the app has a remote, so `flatpak update` (and the desktop's
+# software centre) fetch new versions from it.
+[Flatpak Ref]
+Title=AniCh
+Name=org.eu.emmmm.anich
+Branch=master
+Url=https://lyndon0na.github.io/AniCh-flatpak/repo
+SuggestRemoteName=anich
+Homepage=https://anich.emmmm.eu.org
+Icon=https://lyndon0na.github.io/AniCh-flatpak/icon.png
+IsRuntime=false
+RuntimeRepo=https://dl.flathub.org/repo/flathub.flatpakrepo
+GPGKey=mQINBGrMQ84BEAC5rU38rCzeEoojmR5qZSkB2bEbVT2146WjNCzMfaL3huKM/h+2GXLTf8Y0+5lNzvglGjoB26/7qTC9KF0FhnV2kgGro9o7LQD6T0WaeoWWDnYezk015yEk4kRG0PhWxDVDEiB/67YNLvJLLmjEPiJSit+CCvHyK1d42Obv7XUsgFUYDoCW97z8QKtI1uvHBhbvuMPhZL4gRreNCB2S8sI+1U6ugi2bUf7IP232embBLg/uxcJcoScvdDknpWq/p3brJe5UfMdTcRJUayGbMlud8Wjzho85rvSkyh7deo9WTHCx98H90kJPmmvos5jDSm9D4HG9grd6XLOkqXvXt5tZ9PDxoqTGdDRnYEiCnbmQCObh5VJYdY2ihGMCPlpdbcGtP968ILPQvTM5HBXRC3JJz4vNsEIAN4zvaIIILRC5qO2fH+RxOBBSM7Nl6b99yV6SGxXMBel+e5vHx+hqb08Eq+WlqqKIJmLmIsdFlcXREqMnf/9WXgVGd+ws0yITvwTVrp86Q7yTvNxEuuxSHxWw0pMucWK0Iw+Ufjy7XZyAIAFU3nucfIlGcwZcnyGwCPy2BtGDP3oI+P9zRTMf9Ddi3Y4Ucb+VvsYvQrGsg4Pe3SbqGF1OP/ATEJwhVxkaEyPRsrNQlaf2S9UsyOpnEBoyJVXf68ASHcfO7f3rnCs89QARAQABtDJBbmlDaCBGbGF0cGFrIDxseW5kb24wbmFAdXNlcnMubm9yZXBseS5naXRodWIuY29tPokCUgQTAQoAPBYhBOm6QJWVvsC0hjOhc6p3oHZETzdbBQJqzEPOAxsvBAULCQgHAgIiAgYVCgkICwIEFgIDAQIeBwIXgAAKCRCqd6B2RE83W9oJD/95JyQrjSvUfQwjjtKvYa44LrtPW65hPId6u6SXUgBLgRzHl8Gup40LUCHTDWDHr9SUInN1nfoqZ8xwW48+ypcOtMq1zYbqpb86Qn/2voZKUgQTwi++05B4yzu1lSwX3oO8GVZgTb3b4NtSPRhNuiDSnt8+8G0j9B3tojhAfftgIOKOOXCYsTCyGWrvr8TrJ42rxxyY8ap39AOq+qYdzzD6HKDDEoWqga+Ui+w7bF1A5uwV1xeysnboFjOVHhaWJcaMYd4VRSoalkoXASQ3jMjRp1adrXK2UCKNVlmRrLYCxONlKhOtbQuEirPDToHW0iwhujK/2koxEoeTUnXcSPNG6P/EN3vvhNzOYwFQh46Mnn3Kae99CVZuMBC2/djLRPj/ODAofFdoYHj1fsOpzvwsMh34EIt1zM5Arl9vQh+qLp1ZGM3eeaJ3+66hkdt8r/IIltMy4d++W+SD0WMhSHyeNTD+ULK5+UKDXws4Lg3n/QRqjdnxGZLWx1a0IT6X2gFfBqxE/YMpCax2xnePxPTei4hUm1N9uPnGrcp0C7zmlEq5wKXhlHeQYiHsGOYWRFplkIRF8dhTC11Y/L1qvTlzVUyJvY5Dx4Ndb1OnZqnbKzYchH9butd5JNpg+BokUgrRA9hPW1iilQTBDw8ES/uC4Q4KgKOO3SC2kmKIfwxZ5w==
