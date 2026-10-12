@@ -1,39 +1,97 @@
+# AniCh repackaged as a Flatpak from the official Linux .deb release.
+#
+# The .deb is not a build input and is not redistributed from here. It is
+# declared as an extra-data source, so flatpak downloads it straight from the
+# upstream release on the user's machine, verifies its sha256 and then runs
+# apply_extra to unpack it. This repository ships nothing but the desktop
+# metadata, the entry point and two helper scripts.
+#
+# Upstream used to publish a Linux AppImage and a /usr/share/anich .deb; the
+# current releases only ship a /opt/anich .deb (and a portable .zip). The .deb
+# is declared here because that is what the previous packaging extracted, and
+# it carries the same tree the .zip does: /opt/anich/{anich,lib,data}, with the
+# launcher's RUNPATH ($ORIGIN/lib) pointing at the bundled libraries.
+
 app-id: org.eu.emmmm.anich
 runtime: org.gnome.Platform
-runtime-version: '50'
+runtime-version: '51'
 sdk: org.gnome.Sdk
-command: /app/anich
+command: anich
+
 finish-args:
+  # Online anime sources, danmaku APIs and DoH resolution.
   - --share=network
+  # X11 shared memory, used by the fallback X11 path below.
+  - --share=ipc
+  # libmpv renders through GL/VA-API; GTK also needs a GPU device for Skia.
   - --device=dri
   - --socket=pulseaudio
   - --socket=wayland
   - --socket=fallback-x11
+  # Inhibit the screen saver and sleep while a video plays. The app calls
+  # org.freedesktop.ScreenSaver; without this grant the call fails silently and
+  # the machine can suspend mid-playback.
   - --talk-name=org.freedesktop.ScreenSaver
-  - --persist=anich_data
+  # Notifications for downloads and playback events.
+  - --talk-name=org.freedesktop.Notifications
+  # Nothing on the host filesystem is requested. Everything the app writes by
+  # default - the downloaded media, the cache, the shaders copied at first run
+  # and the database - lives under ~/.var/app/org.eu.emmmm.anich/, which the
+  # sandbox provides on its own. A user who points the app at a real path has to
+  # grant that path, e.g. `flatpak override --user --filesystem=xdg-download
+  # org.eu.emmmm.anich`, or the same per app in Flatseal.
+
+build-options:
+  # There is nothing to strip or debug here: the only ELF files are inside the
+  # .deb, which is unpacked on the user's machine, not during this build.
+  strip: false
+  no-debuginfo: true
+
 modules:
   - name: anich
     buildsystem: simple
     build-commands:
-      - ar x anich.deb
-      - tar -I zstd -xf data.tar.zst
-      - install -Dm755 usr/share/anich/anich ${FLATPAK_DEST}/anich
-      - mkdir -p ${FLATPAK_DEST}/lib
-      - install -m644 usr/share/anich/lib/*.so* ${FLATPAK_DEST}/lib/
-      - mkdir -p ${FLATPAK_DEST}/data
-      - cp -r usr/share/anich/data/flutter_assets ${FLATPAK_DEST}/data/
-      - install -m644 usr/share/anich/data/icudtl.dat ${FLATPAK_DEST}/data/
-      - install -Dm644 org.eu.emmmm.anich.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/org.eu.emmmm.anich.png
-      - install -Dm644 org.eu.emmmm.anich.desktop ${FLATPAK_DEST}/share/applications/org.eu.emmmm.anich.desktop
-      - install -Dm644 org.eu.emmmm.anich.metainfo.xml ${FLATPAK_DEST}/share/metainfo/org.eu.emmmm.anich.metainfo.xml
+      - install -Dm755 anich-wrapper "${FLATPAK_DEST}/bin/anich"
+      # flatpak looks for exactly this path when it has extra data to apply.
+      - install -Dm755 apply_extra "${FLATPAK_DEST}/bin/apply_extra"
+      - install -Dm755 extract-deb.py "${FLATPAK_DEST}/libexec/extract-deb.py"
+      - install -Dm644 org.eu.emmmm.anich.desktop
+        "${FLATPAK_DEST}/share/applications/org.eu.emmmm.anich.desktop"
+      - install -Dm644 org.eu.emmmm.anich.metainfo.xml
+        "${FLATPAK_DEST}/share/metainfo/org.eu.emmmm.anich.metainfo.xml"
+      # Local file sources are staged flattened to their basename.
+      - install -Dm644 org.eu.emmmm.anich-512.png
+        "${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/org.eu.emmmm.anich.png"
+      - install -Dm644 org.eu.emmmm.anich-256.png
+        "${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/org.eu.emmmm.anich.png"
+      - install -Dm644 org.eu.emmmm.anich-128.png
+        "${FLATPAK_DEST}/share/icons/hicolor/128x128/apps/org.eu.emmmm.anich.png"
     sources:
+      # Retrieved by flatpak on the user's machine, at install and at every
+      # update: flatpak-builder never downloads it, it only records the entry in
+      # the app metadata. sha256 and size are the published upstream asset
+      # (Sle2p/AniCh 1.5.27, 22490848 bytes). Bumping upstream means editing
+      # url, sha256 and size here - nothing else in this manifest.
+      - type: extra-data
+        filename: anich.deb
+        url: https://github.com/Sle2p/AniCh/releases/download/1.5.27/anich-linux-1.5.27.deb
+        sha256: f531e7b429f2bec946ed483cbf9b1b9c338db754bf2d8f611c06c7076324dd3f
+        size: 22490848
+        only-arches:
+          - x86_64
       - type: file
-        url: https://github.com/Sle2p/AniCh/releases/download/1.5.18/anich-linux-1.5.18.deb
-        sha256: 3423befd27d0551519dd01a91e3e632acafdf32179781e06b8e7fcaa9176a354
-        dest-filename: anich.deb
+        path: apply_extra
       - type: file
-        path: org.eu.emmmm.anich.png
+        path: extract-deb.py
+      - type: file
+        path: anich-wrapper
       - type: file
         path: org.eu.emmmm.anich.desktop
       - type: file
         path: org.eu.emmmm.anich.metainfo.xml
+      - type: file
+        path: icons/org.eu.emmmm.anich-512.png
+      - type: file
+        path: icons/org.eu.emmmm.anich-256.png
+      - type: file
+        path: icons/org.eu.emmmm.anich-128.png

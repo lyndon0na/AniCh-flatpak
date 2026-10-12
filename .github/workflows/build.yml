@@ -1,74 +1,227 @@
-name: Build Flatpak
+name: build
 
 on:
-  push:
-    tags:
-      - 'v*'
   workflow_dispatch:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  contents: write
+
+env:
+  GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  flatpak:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install flatpak-builder
+      - name: Install flatpak and flatpak-builder
         run: |
-          sudo apt update
-          sudo apt install -y flatpak flatpak-builder
-          flatpak remote-add --user --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends flatpak flatpak-builder
 
-      - name: Install GNOME SDK
+      - name: Install the GNOME runtime and SDK from Flathub
         run: |
-          flatpak install --user -y flathub org.gnome.Platform//50 org.gnome.Sdk//50
+          flatpak remote-add --if-not-exists --user flathub \
+            https://dl.flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.gnome.Platform//51 org.gnome.Sdk//51
 
-      - name: Build Flatpak
+      # The .deb is an extra-data source: flatpak-builder only records it in the
+      # app metadata, and flatpak downloads it from the upstream release at
+      # install time. So this build stays small, and installing it is the first
+      # point in the pipeline where the app's files exist at all (~22 MB, from
+      # GitHub, verified against the sha256 in the manifest).
+      #
+      # rofiles-fuse buys nothing here: the module only installs small files, it
+      # never compiles anything.
+      - name: Build and install
         run: |
-          flatpak-builder --user --repo=repo --force-clean build-dir org.eu.emmmm.anich.yml
+          flatpak-builder --user --install --force-clean --disable-rofiles-fuse \
+            --repo=repo build org.eu.emmmm.anich.yml
 
-      - name: Create bundle
+      - name: Verify the installed app
         run: |
-          flatpak build-bundle repo anich.flatpak org.eu.emmmm.anich
+          set -euo pipefail
+          app="$(flatpak info --user --show-location org.eu.emmmm.anich)/files"
+          metadata="$RUNNER_TEMP/metadata.txt"
 
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: anich-flatpak
-          path: anich.flatpak
+          # What to expect is read from the manifest, the only file a version
+          # bump rewrites.
+          extra="$(sed -n '/type: extra-data/,/only-arches/p' org.eu.emmmm.anich.yml)"
+          version="$(printf '%s\n' "$extra" | sed -n 's|.*/download/\([^/]*\)/.*|\1|p')"
+          url="$(printf '%s\n' "$extra" | sed -n 's/^ *url: *//p')"
+          sha256="$(printf '%s\n' "$extra" | sed -n 's/^ *sha256: *//p')"
+          size="$(printf '%s\n' "$extra" | sed -n 's/^ *size: *//p')"
+          test -n "$version" && test -n "$url" && test -n "$sha256" && test -n "$size"
+          echo "manifest: AniCh $version, $size bytes, sha256 $sha256"
 
-  release:
-    needs: build
-    runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/')
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          name: anich-flatpak
+          # Everything shipped by this repository.
+          test -x "$app/bin/anich"
+          test -x "$app/bin/apply_extra"
+          test -f "$app/libexec/extract-deb.py"
 
-      - name: Get version from tag
-        id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+          # Everything apply_extra produced at install time.
+          test -x "$app/extra/anich/anich"
+          test -f "$app/extra/anich/data/icudtl.dat"
+          test -d "$app/extra/anich/lib"
+          test ! -e "$app/extra/anich.deb"
+          test ! -e "$app/extra/tree"
 
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
-        with:
-          name: Anich ${{ steps.get_version.outputs.VERSION }}
-          body: |
-            ## Anich Flatpak 包
-            
-            基于 Anich ${{ steps.get_version.outputs.VERSION }} 版本构建。
-            
-            ### 安装方法
-            ```bash
-            flatpak install --user anich.flatpak
-            ```
-            
-            ### 运行
-            ```bash
-            flatpak run org.eu.emmmm.anich
-            ```
-          files: anich.flatpak
+          # The version the payload reports must match the one in the manifest.
+          grep -q "\"version\":\"$version\"" \
+            "$app/extra/anich/data/flutter_assets/version.json"
+
+          for dim in 128 256 512; do
+            test -f "$app/share/icons/hicolor/${dim}x${dim}/apps/org.eu.emmmm.anich.png"
+          done
+
+          # The commit must carry the extra-data instruction, otherwise flatpak
+          # would have installed an app with no payload in it. flatpak records
+          # it verbatim, so it has to be what the manifest declared.
+          flatpak info --user -m org.eu.emmmm.anich > "$metadata"
+          sed -n '/^\[Extra Data\]/,/^\[/p' "$metadata"
+          grep -qx "checksum=$sha256" "$metadata"
+          grep -qx "size=$size" "$metadata"
+          grep -qx "uri=$url" "$metadata"
+          echo "installed app ok"
+
+      # The runner has no display. Xvfb is enough for the app to log its
+      # subsystem status, which proves that what apply_extra produced at install
+      # time actually launches. Best effort: this step reports but does not fail
+      # the build.
+      #
+      # Every layer here is hard-bounded on purpose. Killing `flatpak run` leaves
+      # the sandbox's own processes alive, and dbus-run-session then waits for
+      # its bus to drain, so without a kill-based timeout the step never returns
+      # and the release step behind it never runs.
+      - name: Smoke test under Xvfb
+        continue-on-error: true
+        timeout-minutes: 6
+        run: |
+          sudo apt-get install -y --no-install-recommends xvfb dbus-x11
+          log="$RUNNER_TEMP/anich.log"
+          timeout --signal=KILL 180 dbus-run-session -- xvfb-run -a \
+            --server-args='-screen 0 1280x800x24' \
+            flatpak run org.eu.emmmm.anich >"$log" 2>&1 || true
+          flatpak kill org.eu.emmmm.anich 2>/dev/null || true
+          echo "--- last 40 lines ---"
+          tail -40 "$log"
+          grep -q 'media_kit_libs_linux registered' "$log"
+
+      # ---------------------------------------------------------------------
+      # Publishing. Only a tag publishes: the repository is updated in place so
+      # that flatpak can generate deltas between versions, and the descriptors
+      # that users install from are regenerated from the signing key every time.
+      # ---------------------------------------------------------------------
+      - name: Import the signing key
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "::error::GPG_PRIVATE_KEY is not configured; see the publishing section of the README" >&2
+            exit 1
+          fi
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          key_id="$(gpg --list-secret-keys --with-colons | awk -F: '/^fpr:/ { print $10; exit }')"
+          test -n "$key_id"
+          echo "GPG_KEY_ID=$key_id" >> "$GITHUB_ENV"
+          gpg --export "$key_id" > "$RUNNER_TEMP/key.gpg"
+          echo "signing with $key_id"
+
+      - name: Check out the published repository
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          url="https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${GITHUB_REPOSITORY}.git"
+          if git clone --depth=1 --branch=gh-pages "$url" pages 2>/dev/null; then
+            echo "continuing the published gh-pages branch"
+          else
+            echo "creating the gh-pages branch"
+            mkdir -p pages
+            git -C pages init -q -b gh-pages
+            git -C pages remote add origin "$url"
+          fi
+          git -C pages config user.name "github-actions[bot]"
+          git -C pages config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      # Everything the app needs is in the previous commit, so this stays small
+      # (tens of kilobytes). Building into the already published repository is
+      # what keeps its history, and therefore the version-to-version deltas.
+      - name: Build the signed repository
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          flatpak-builder --user --force-clean --disable-rofiles-fuse \
+            --repo=pages/repo --gpg-sign="$GPG_KEY_ID" build org.eu.emmmm.anich.yml
+
+          # An OSTree repository carries empty refs/remotes and refs/mirrors
+          # directories, and git cannot transport empty directories, so both are
+          # missing from the cloned repository. flatpak build-update-repo fails
+          # without them, while generating the static deltas.
+          mkdir -p pages/repo/refs/remotes pages/repo/refs/mirrors
+
+          flatpak build-update-repo --gpg-sign="$GPG_KEY_ID" \
+            --generate-static-deltas --title=AniCh pages/repo
+
+      - name: Publish the descriptors and push
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          set -euo pipefail
+          pages_url="https://${GITHUB_REPOSITORY%%/*}.github.io/${GITHUB_REPOSITORY#*/}"
+          key_b64="$(base64 -w0 "$RUNNER_TEMP/key.gpg")"
+          for name in org.eu.emmmm.anich.flatpakref org.eu.emmmm.anich.flatpakrepo; do
+            sed -e "s|@PAGES_URL@|$pages_url|g" -e "s|@GPGKEY@|$key_b64|g" \
+              "$name.in" > "pages/$name"
+          done
+          install -m644 icons/org.eu.emmmm.anich-512.png pages/icon.png
+          git -C pages add -A
+          if git -C pages diff --cached --quiet; then
+            echo "nothing new to publish"
+          else
+            git -C pages commit -q -m "Publish ${GITHUB_REF_NAME}"
+            git -C pages push -q origin gh-pages
+            echo "published ${GITHUB_REF_NAME} to ${pages_url}"
+          fi
+
+      # No bundle is published: a bundle does not carry the detached metadata
+      # that holds an extra-data record, so flatpak refuses to install one
+      # ("extra data missing in detached metadata"). The flatpakref, and the
+      # repository behind it, are the only install path.
+      - name: Create or update the release
+        if: startsWith(github.ref, 'refs/tags/v')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag="$GITHUB_REF_NAME"
+          version="$(grep -oE 'releases/download/[0-9.]+' org.eu.emmmm.anich.yml | head -1 | sed 's|.*/||')"
+          pages_url="https://${GITHUB_REPOSITORY%%/*}.github.io/${GITHUB_REPOSITORY#*/}"
+          notes="$RUNNER_TEMP/release-notes.md"
+
+          {
+            echo "AniCh ${version} repackaged as a Flatpak for x86_64. The app itself"
+            echo "is downloaded from the [upstream release](https://github.com/Sle2p/AniCh/releases/tag/${version})"
+            echo "by flatpak, at install and at every update, and checked against the"
+            echo "sha256 recorded in the manifest."
+            echo
+            echo "Install with:"
+            echo
+            echo '```'
+            echo "flatpak install --user ${pages_url}/org.eu.emmmm.anich.flatpakref"
+            echo '```'
+            echo
+            echo "That configures the remote as well, so later versions arrive through"
+            echo "\`flatpak update\`. Installing downloads ~22 MB from GitHub and needs"
+            echo "org.gnome.Platform 51."
+          } > "$notes"
+
+          if gh release view "$tag" >/dev/null 2>&1; then
+            gh release edit "$tag" --notes-file "$notes"
+          else
+            gh release create "$tag" --title "AniCh ${version} (Flatpak)" --notes-file "$notes"
+          fi

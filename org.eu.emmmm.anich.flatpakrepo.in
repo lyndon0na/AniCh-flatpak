@@ -1,0 +1,13 @@
+# Same substitution as the .flatpakref, for users who would rather add the
+# remote themselves and then install by ref:
+#
+#   flatpak remote-add --user --if-not-exists anich https://<pages>/org.eu.emmmm.anich.flatpakrepo
+#   flatpak install --user anich org.eu.emmmm.anich
+[Flatpak Repo]
+Title=AniCh
+Url=@PAGES_URL@/repo
+Homepage=https://anich.emmmm.eu.org
+Comment=Unofficial AniCh Flatpak builds
+Description=AniCh, repackaged as a Flatpak. The application payload comes from the upstream GitHub release.
+Icon=@PAGES_URL@/icon.png
+GPGKey=@GPGKEY@

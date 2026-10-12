@@ -1,0 +1,15 @@
+# Upstream .deb. flatpak-builder never fetches this - it is an extra-data
+# source, downloaded by flatpak on the machine where the app is installed - but
+# a local copy is handy for offline experiments with extract-deb.py.
+anich-linux-*.deb
+anich.deb
+
+# flatpak-builder working state
+.flatpak-builder/
+build/
+build-dir/
+repo/
+
+# Exported bundles. They cannot carry an extra-data record, so they are not a
+# supported install path; ignore any that get left behind.
+*.flatpak

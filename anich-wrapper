@@ -1,0 +1,16 @@
+#!/bin/sh
+# Entry point for the AniCh Flatpak.
+#
+# The app tree is not part of this Flatpak: flatpak downloaded the upstream
+# .deb and apply_extra unpacked it into /app/extra/anich at install time.
+#
+# The launcher is exec'd directly rather than through a shell so that
+# /proc/self/exe - which Flutter's GTK embedder uses to locate the `data`
+# directory next to the executable - resolves to the real path. Its RUNPATH
+# ($ORIGIN/lib) then finds the bundled libraries, so LD_LIBRARY_PATH does not
+# have to be touched.
+set -eu
+
+APP=/app/extra/anich
+cd "$APP"
+exec "$APP/anich" "$@"

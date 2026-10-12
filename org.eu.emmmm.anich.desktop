@@ -1,9 +1,12 @@
 [Desktop Entry]
-Name=Anich
+Name=AniCh
 Comment=支持超分辨率的在线动漫弹幕播放器
-Exec=/app/anich
+Comment[en]=Online anime player with danmaku and super-resolution
+Exec=anich %U
 Icon=org.eu.emmmm.anich
+Terminal=false
 Type=Application
-Categories=AudioVideo;Player;GTK;
+Categories=AudioVideo;Player;Video;
+Keywords=anime;danmaku;anich;动漫;追番;弹幕;
 StartupNotify=true
 StartupWMClass=anich

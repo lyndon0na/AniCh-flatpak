@@ -1,0 +1,37 @@
+#!/bin/sh
+# Unpacks the AniCh .deb into /app/extra/anich.
+#
+# flatpak runs this at install and update time, as the installing user (or as
+# root through the system helper), inside a sandbox for this app. The working
+# directory is /app/extra, that is the only writable place, and there is no
+# network, D-Bus or host access. The .deb itself has already been downloaded
+# from the upstream release and checked against the sha256 in the manifest, so
+# this script only has to turn it into /app/extra/anich, which is what
+# /app/bin/anich runs.
+set -eu
+
+DEB=/app/extra/anich.deb
+TREE=/app/extra/tree
+APP=/app/extra/anich
+
+cd /app/extra
+
+rm -rf "$TREE" "$APP"
+mkdir -p "$TREE"
+
+# python3 comes from org.gnome.Platform; the runtime has tar and zstd but no
+# `ar`/`dpkg-deb`, so the .deb container is parsed by the helper.
+python3 /app/libexec/extract-deb.py "$DEB" "$TREE"
+
+# The deb's payload lives at /opt/anich; the .desktop file and the icons it
+# also carries are not needed, this package ships its own metadata.
+mv "$TREE/opt/anich" "$APP"
+rm -rf "$TREE" "$DEB"
+
+# flatpak does not mark extra data executable, and the tar `data` filter keeps
+# the mode it came with, so make it explicit.
+chmod +x "$APP/anich"
+
+test -x "$APP/anich"
+test -f "$APP/data/icudtl.dat"
+test -d "$APP/lib"

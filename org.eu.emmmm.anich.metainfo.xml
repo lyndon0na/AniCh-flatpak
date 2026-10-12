@@ -1,17 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
   <id>org.eu.emmmm.anich</id>
-  <name>Anich</name>
-  <summary>支持超分辨率的在线动漫弹幕播放器</summary>
-  <description>
-    <p>一个支持超分辨率的在线动漫弹幕APP。多平台，多番剧源，多弹幕，高清无广告。追番看番必备软件。</p>
-  </description>
+
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>Proprietary</project_license>
-  <url type="homepage">https://anich.emmmm.eu.org</url>
-  <developer_name>Sle2p</developer_name>
+
+  <name>AniCh</name>
+  <summary>支持超分辨率的在线动漫弹幕播放器</summary>
+
+  <description>
+    <p>一个支持超分辨率的在线动漫弹幕 APP。多平台，多番剧源，多弹幕，高清无广告。追番看番必备软件。</p>
+    <p>
+      AniCh is a cross-platform online anime player. It aggregates multiple
+      anime sources and danmaku providers, and upscales playback in real time
+      with the Anime4K shaders it ships.
+    </p>
+  </description>
+
   <launchable type="desktop-id">org.eu.emmmm.anich.desktop</launchable>
+
+  <url type="homepage">https://anich.emmmm.eu.org</url>
+  <url type="bugtracker">https://github.com/Sle2p/AniCh/issues</url>
+
+  <developer id="eu.emmmm">
+    <name>Sle2p</name>
+  </developer>
+
+  <categories>
+    <category>AudioVideo</category>
+    <category>Player</category>
+    <category>Video</category>
+  </categories>
+
+  <keywords>
+    <keyword>anime</keyword>
+    <keyword>danmaku</keyword>
+    <keyword>anich</keyword>
+  </keywords>
+
+  <provides>
+    <binary>anich</binary>
+  </provides>
+
+  <content_rating type="oars-1.1">
+    <content_attribute id="social-chat">mild</content_attribute>
+  </content_rating>
+
   <releases>
-    <release version="1.5.18" date="2025-06-17"/>
+    <release version="1.5.27" date="2026-10-05">
+      <description>
+        <p>Packaged from the anich-linux-1.5.27 release.</p>
+      </description>
+    </release>
   </releases>
 </component>
