@@ -70,13 +70,13 @@ modules:
       # Retrieved by flatpak on the user's machine, at install and at every
       # update: flatpak-builder never downloads it, it only records the entry in
       # the app metadata. sha256 and size are the published upstream asset
-      # (Sle2p/AniCh 1.5.27, 22490848 bytes). Bumping upstream means editing
+      # (Sle2p/AniCh 1.5.28, 22381370 bytes). Bumping upstream means editing
       # url, sha256 and size here - nothing else in this manifest.
       - type: extra-data
         filename: anich.deb
-        url: https://github.com/Sle2p/AniCh/releases/download/1.5.27/anich-linux-1.5.27.deb
-        sha256: f531e7b429f2bec946ed483cbf9b1b9c338db754bf2d8f611c06c7076324dd3f
-        size: 22490848
+        url: https://github.com/Sle2p/AniCh/releases/download/1.5.28/anich-linux-1.5.28.deb
+        sha256: 81fd10f6ca428d82bac90b1905dd9a5de2f9b128a74fcf117e1577c2823ef22a
+        size: 22381370
         only-arches:
           - x86_64
       - type: file

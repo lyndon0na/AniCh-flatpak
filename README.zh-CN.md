@@ -15,13 +15,13 @@ flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.an
 | 项目 | 值 |
 |------|-----|
 | 名称 | AniCh |
-| 版本 | 1.5.27 |
+| 版本 | 1.5.28 |
 | App ID | `org.eu.emmmm.anich` |
 | Runtime | `org.gnome.Platform` 51 |
 | 架构 | x86_64 |
 | 上游源码 | https://github.com/Sle2p/AniCh |
 | 官网 | https://anich.emmmm.eu.org |
-| 应用载荷 | 上游的 `anich-linux-1.5.27.deb`，以 [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data) 方式声明：flatpak 在安装该应用的机器上下载它、校验 sha256，再由 `apply_extra` 解包 |
+| 应用载荷 | 上游的 `anich-linux-1.5.28.deb`，以 [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data) 方式声明：flatpak 在安装该应用的机器上下载它、校验 sha256，再由 `apply_extra` 解包 |
 
 ## 安装
 
@@ -120,8 +120,8 @@ flatpak override --user --filesystem=xdg-download org.eu.emmmm.anich
 runner 没有显示器，所以 GUI 冒烟测试在 Xvfb 下运行，属于尽力而为的步骤，只报告不使构建失败；结构性检查则会使构建失败。
 
 ```sh
-git tag v1.5.27
-git push origin v1.5.27
+git tag v1.5.28
+git push origin v1.5.28
 ```
 
 ## 发布

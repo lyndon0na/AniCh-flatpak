@@ -47,6 +47,11 @@
   </content_rating>
 
   <releases>
+    <release version="1.5.28" date="2026-11-28">
+      <description>
+        <p>Packaged from the anich-linux-1.5.28 release.</p>
+      </description>
+    </release>
     <release version="1.5.27" date="2026-10-05">
       <description>
         <p>Packaged from the anich-linux-1.5.27 release.</p>
