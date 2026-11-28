@@ -15,13 +15,13 @@ flatpak install --user https://lyndon0na.github.io/AniCh-flatpak/org.eu.emmmm.an
 | | |
 |---|---|
 | Name | AniCh |
-| Version | 1.5.27 |
+| Version | 1.5.28 |
 | App ID | `org.eu.emmmm.anich` |
 | Runtime | `org.gnome.Platform` 51 |
 | Architecture | x86_64 |
 | Upstream source | https://github.com/Sle2p/AniCh |
 | Homepage | https://anich.emmmm.eu.org |
-| App payload | the upstream `anich-linux-1.5.27.deb`, declared as an [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data) source: flatpak downloads it on the machine where the app is installed, verifies its sha256, and `apply_extra` unpacks it there |
+| App payload | the upstream `anich-linux-1.5.28.deb`, declared as an [extra-data](https://docs.flatpak.org/en/latest/module-sources.html#extra-data) source: flatpak downloads it on the machine where the app is installed, verifies its sha256, and `apply_extra` unpacks it there |
 
 ## Installation
 
@@ -140,8 +140,8 @@ The runner is headless, so the GUI smoke test runs under Xvfb as a best-effort
 step that reports without failing the build. The structural checks are gating.
 
 ```sh
-git tag v1.5.27
-git push origin v1.5.27
+git tag v1.5.28
+git push origin v1.5.28
 ```
 
 ## Publishing
